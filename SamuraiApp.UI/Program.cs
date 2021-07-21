@@ -58,6 +58,14 @@ namespace SamuraiApp.UI
             // ReplaceAHorse();
             // GetSamuraiWithHorse();
             // GetHorsesWithSamurai();
+
+            // QuerySamuraiBattleStats();
+            // QueryUsingRawSql();
+            // QueryRelatedUsingRawSql();
+            // QueryUsingRawSqlWithInterpolation();
+            // QueryUsingFromSqlRawStoredProc();
+            // QueryUsingFromSqlIntStoredProc();
+            // ExecuteSomeRawSql();
         }
 
         private static void AddVariousTypes()
@@ -433,6 +441,70 @@ namespace SamuraiApp.UI
                 .Where(s => s.Horse != null)
                 .Select(s => new { Horse = s.Horse, Samurai = s })
                 .ToList();
+        }
+
+        private static void QuerySamuraiBattleStats()
+        {
+            // var stats = _context.SamuraiBattleStats.ToList();
+
+            // var firstStat = _context.SamuraiBattleStats.FirstOrDefault();
+            // var kotStat = _context.SamuraiBattleStats
+            //     .FirstOrDefault(samurai => samurai.Name == "Kota");
+
+            // var findOne = _context.SamuraiBattleStats.Find(2);       // Will not work since its a keyless entity
+        }
+
+        private static void QueryUsingRawSql()
+        {
+            var samurais = _context.Samurais.FromSqlRaw("Select * from samurais").ToList();
+        }
+
+        private static void QueryRelatedUsingRawSql()
+        {
+            var samurais = _context.Samurais.FromSqlRaw("Select Id, Name from Samurais").Include(samurai => samurai.Quotes).ToList();
+        }
+
+        private static void QueryUsingRawSqlWithInterpolation()
+        {
+            string name = "Kota";
+            var samurais = _context.Samurais
+                .FromSqlInterpolated($"Select * from Samurais Where Name = {name}")
+                .ToList();
+        }
+
+        private static void DANGERQueryUsingRawSqlWithInterpolation()
+        {
+            string name = "Kota";
+            var samurais = _context.Samurais
+                .FromSqlRaw($"Select * from Samurais Where Name = '{name}")
+                .ToList();
+        }
+        /*DO NOT USE ^^^^^^^^^^^^^^^^^^^*/
+
+        private static void QueryUsingFromSqlRawStoredProc()
+        {
+            var text = "Happy";
+            var samurais = _context.Samurais.FromSqlRaw(
+                "EXEC dbo.SamuraisWhoSaidAWord {0}", text).ToList();
+        }
+
+        private static void QueryUsingFromSqlIntStoredProc()
+        {
+            var text = "Happy";
+            var samurais = _context.Samurais.FromSqlInterpolated(
+                $"EXEC dbo.SamuraisWhoSaidAWord {text}").ToList();
+        }
+
+        private static void ExecuteSomeRawSql()
+        {
+            // var samuraiId = 2;
+            // var affected = _context.Database
+            //     .ExecuteSqlRaw("EXEC DeleteQuotesForSamurai {0}", samuraiId);
+
+            // Interpolated vv
+            var samuraiId = 2;
+            var affected = _context.Database
+                .ExecuteSqlInterpolated($"EXEC DeleteQuotesForSamurai {samuraiId}");
         }
     }
 }
